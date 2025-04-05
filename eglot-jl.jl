@@ -37,6 +37,11 @@ if length(ARGS) >= 2 && ARGS[2] != ""
     depot_path = ARGS[2]
 end
 
+# Get the store path for SymbolServer. In order of increasing priority:
+# - default value:  inside the SymbolServer package directory
+# - environment:    ENV["JULIA_SYMSERVER_STORE_PATH"]
+symserver_store_path = get(ENV, "JULIA_SYMSERVER_STORE_PATH", nothing)
+
 # Get the project environment from the source path
 project_path = something(Base.current_project(src_path), Base.load_path_expand(LOAD_PATH[2])) |> dirname
 
@@ -47,5 +52,5 @@ push!(LOAD_PATH, "@")
 using LanguageServer, SymbolServer
 
 @info "Running language server" env=Base.load_path()[1] src_path project_path depot_path
-server = LanguageServerInstance(stdin, stdout, project_path, depot_path)
+server = LanguageServerInstance(stdin, stdout, project_path, depot_path, nothing, symserver_store_path)
 run(server)
